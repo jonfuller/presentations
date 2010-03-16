@@ -11,8 +11,8 @@ files = [
 
 default = {
   :style => "vim",
-  :font => "Inconsolata",
-  :font_size => 14 }
+  :font => "\"Lucida Console\"",
+  :font_size => 18 }
 
 files.each do |f|
   src_file = "src/#{f[:filename]}"
@@ -25,7 +25,7 @@ files.each do |f|
   font_size = f[:font_size] || default[:font_size]
 
 
-  height = f[:height] || (File.open(src_file) { |src| src.readlines() }).length*2*font_size+20
+  height = f[:height] || (File.open(src_file) { |src| src.readlines() }).length*font_size+20
   width = f[:width] || (File.open(src_file) { |src| src.readlines() }).map { |line| line.length}.max*(font_size*2/3)
 
   # highlight the file into an SVG
@@ -38,7 +38,14 @@ files.each do |f|
   svg.insert(4, "<style>")
   svg.insert(5, "</style>")
   svg.insert(5, css)
-  svg.flatten
+  svg.flatten!
+  
+  # make the line spacing a little closer
+  index = -1
+  svg.each do |line| 
+    index = index+1 if /(y=\")([0-9]+)(\")/.match(line)
+    line.gsub!(/(y=\")([0-9]+)(\")/, '\1' + (index*(font_size)).to_s + '\3')
+  end
   File.open(svg_file, "w") {|f| svg.each {|line| f.write(line)}}
 
 
