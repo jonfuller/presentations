@@ -4,12 +4,15 @@
 # 
 
 files = [
-  {:filename => "whatever.cs", :syntax => "cs"}]
+  {:filename => "ServiceLocator.cs", :syntax => "cs"},
+  {:filename => "NoInjection.cs", :syntax => "cs"},
+  {:filename => "ConstructorInjection.cs", :syntax => "cs"},
+  {:filename => "PropertyInjection.cs", :syntax => "cs"}]
 
 default = {
   :style => "vim",
   :font => "Inconsolata",
-  :font_size => 12 }
+  :font_size => 14 }
 
 files.each do |f|
   src_file = "src/#{f[:filename]}"
