@@ -1,3 +1,8 @@
+# Usage:
+#   fill in your filenames and syntax styles.  your files should be in src
+#   your output png's will show up in img
+# 
+
 files = [
   {:filename => "whatever.cs", :syntax => "cs"}]
 
