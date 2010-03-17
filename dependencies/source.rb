@@ -7,10 +7,16 @@ files = [
   {:filename => "ServiceLocator.cs", :syntax => "cs"},
   {:filename => "NoInjection.cs", :syntax => "cs"},
   {:filename => "ConstructorInjection.cs", :syntax => "cs"},
+  {:filename => "PoorManDI.cs", :syntax => "cs"},
+  {:filename => "ManualInjection.cs", :syntax => "cs"},
+  {:filename => "Container.cs", :syntax => "cs"},
+  {:filename => "ContainerAutowire.cs", :syntax => "cs"},
+  {:filename => "Singleton.cs", :syntax => "cs"},
+  {:filename => "Intercept.cs", :syntax => "cs"},
   {:filename => "PropertyInjection.cs", :syntax => "cs"}]
 
 default = {
-  :style => "vim",
+  :style => "ide-msvs2008",
   :font => "\"Lucida Console\"",
   :font_size => 18 }
 
@@ -23,7 +29,6 @@ files.each do |f|
   style = f[:style] || default[:style]
   font = f[:font] || default[:font]
   font_size = f[:font_size] || default[:font_size]
-
 
   height = f[:height] || (File.open(src_file) { |src| src.readlines() }).length*font_size+20
   width = f[:width] || (File.open(src_file) { |src| src.readlines() }).map { |line| line.length}.max*(font_size*2/3)
