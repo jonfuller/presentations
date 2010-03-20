@@ -8,7 +8,8 @@ public class Program
                .Use<DatabaseMovieFinder>()
                .InterceptWith(new LoggingInterceptor());
 
-            cfg.For<IDbConnection>().Singleton().Use<SqlConnection>()
+            cfg.For<IDbConnection>()
+                .Singleton().Use<SqlConnection>()
                 .Ctor<string>().Is("connection_string");
         });
 

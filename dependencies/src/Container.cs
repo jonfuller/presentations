@@ -7,7 +7,8 @@ public class Program
             cfg.For<IMovieFinder>().Use<ImbdMovieFinder>();
         });
 
-        var lister = new MovieLister(ObjectFactory.GetInstance<IMovieFinder>());
+        var lister = new MovieLister(
+            ObjectFactory.GetInstance<IMovieFinder>());
 
         lister.MoviesDirectedBy("Kubrick").Each(
             movie => Console.WriteLine(movie.ToString()));

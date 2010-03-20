@@ -5,7 +5,8 @@ public class Program
         ObjectFactory.Configure(cfg =>
         {
             cfg.For<IMovieFinder>().Use<DatabaseMovieFinder>();
-            cfg.For<IDbConnection>().Singleton().Use<SqlConnection>()
+            cfg.For<IDbConnection>()
+                .Singleton().Use<SqlConnection>()
                 .Ctor<string>().Is("connection_string");
         });
 
