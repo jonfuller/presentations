@@ -1,7 +1,5 @@
 public class MovieLister
 {
-    private readonly IMovieFinder _finder;
-
     public MovieLister()
     {
     }
@@ -14,7 +12,7 @@ public class MovieLister
 
     public IEnumerable<Movie> MoviesDirectedBy(string director)
     {
-        return _finder
+        return Finder
                  .FindAll()
                  .Where(movie => movie.Director == director);
     }
