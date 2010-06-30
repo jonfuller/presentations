@@ -1,0 +1,103 @@
+require 'albacore'
+require 'rexml/document'
+require 'ruby_gntp'
+
+task :default => %W(build)
+task :build, :needs => [:clean, :debug_config, :msbuild, :mspec]
+task :release, :needs => [:clean, :version, :assemblyinfo, :release_config, :msbuild, :package, :upload]
+
+task :clean do
+  FileUtils.rm_rf Dir.glob('*.zip')
+  FileUtils.rm_rf Dir.glob('**/*obj')
+  FileUtils.rm_rf Dir.glob('**/*bin')
+end
+
+msbuild do |msb|
+  msb.properties @build_config[:properties]
+  msb.path_to_command = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\MSBuild.exe"  
+  msb.targets @build_config[:targets]
+  msb.solution = 'src/Demo.sln'
+end
+
+task :debug_config do
+  @build_config = {
+    :properties => {
+      :configuration => :Debug
+    },
+    :targets => [:Build]
+  }
+end
+
+task :release_config, :needs => [:version] do
+  @build_config = {
+    :properties => {
+      :configuration => :Release
+    },
+    :build_output_location => 'src/Demo/bin/Release',
+    :package_location => File.dirname(__FILE__),
+    :package_filename => "Demo.v#{@version}.zip",
+    :targets => [:Build]
+  }
+end
+
+task :version do
+  @version = '0.1'
+  @long_version = '0.1.0.0'
+end
+
+zip :package, :needs => [:release_config] do |zip|
+  zip.directories_to_zip @build_config[:build_output_location]
+  zip.output_file = @build_config[:package_filename]
+  zip.output_path = @build_config[:package_location]
+end
+
+assemblyinfo :assemblyinfo, :needs =>[:version] do |asm|
+  asm.version = @long_version
+  asm.file_version = @long_version
+  asm.title = 'Demo'
+  asm.description = 'A Demo'
+  asm.company_name = 'Jon Fuller'
+  asm.product_name = 'Demo'
+  asm.copyright = 'Copyright Jon Fuller 2010'
+  asm.output_file = 'src/Demo/Properties/AssemblyInfo.cs'
+end
+
+task :growltest do
+  doc = open('results.xml'){|f| REXML::Document.new(f)}
+  passed = doc.get_elements("//specification[@status='passed']")
+  failed = doc.get_elements("//specification[@status='failed']")
+
+  num_passed = passed.length
+  num_failed = failed.length
+
+  img = num_failed.zero? ? 'green' : 'red'
+  icon = "#{File.join(File.expand_path('.'), 'lib', 'growl', img)}.png"
+
+  failure_tree = failed.inject({}) do |memo, item|
+    memo[item.parent.attributes["name"]] ||= []
+    memo[item.parent.attributes["name"]] << item.attributes["name"]
+    memo
+  end
+  failure_messages = failure_tree.map() do |parent, item|
+    ([parent] + item.map{|i| "   "+i}).join("\n")
+  end.join("\n")
+
+  message = "#{num_passed} passed, #{num_failed} failed.\n#{failure_messages}"
+
+  growl = GNTP.new("watchr growlr")
+  growl.register({:notifications => [
+    {:name    => "success",
+     :enabled => true},
+    {:name    => "failure",
+     :enabled => true}]})
+  growl.notify({
+    :name    => num_failed.zero? ? "success" : "failure",
+    :title   => num_failed.zero? ? "success" : "failure",
+    :text    => num_failed.zero? ? "way to go!" : failure_messages,
+    :icon    => icon,
+    :sticky  => false})
+end
+
+task :mspec do
+  system("lib/mspec/mspec.exe --xml #{File.expand_path('.')}/results.xml #{Dir.glob('src/**/bin/**/Demo*.dll').join(' ')}")
+end
